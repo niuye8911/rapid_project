@@ -1,81 +1,144 @@
-from xml.dom import minidom
 from io import BytesIO
+from xml.dom import minidom
+
+from KDG import *
 from lxml import etree
 
+
 INDENT = "    "
+KNOB_IND = "<Knobs>"
+DEP_IND = "<Dependencies>"
 
 
-def genxml(depfile, outdir):
-    print
-    "RAPID-C / STAGE-1.2 : generating... structural RSDG xml"
-    app_name, rsdg_map = readdep(depfile)
+def genXmlFile(depfile, outdir):
+    kdg = readdep(depfile)
+    if not kdg:
+        return
 
     # write the root:resource
-    xml = genXML(rsdg_map)
-    writeXML(app_name, xml, outdir)
+    xml = genXML(kdg)
+    writeXML(kdg.name, xml, outdir)
+    print("Done...")
 
 
-def genXML(rsdgMap):
+def genXML(kdg):
     print("translating... KDG XML")
-    #write the root:resource
+    # write the root:resource
     xml = etree.Element("resource")
-    #create all the service with range
-    for knob_name, nodes in rsdgMap.items():
-        servicefield = etree.SubElement(xml, "knob")
-        etree.SubElement(servicefield, "knobname").text = knob_name
-        for node in nodes:
-            layer = etree.SubElement(servicefield, "knoblayer")
+    # create all the service with range
+    for knob_name, knob in kdg.knobs.items():
+        knobfield = etree.SubElement(xml, "knob")
+        etree.SubElement(knobfield, "knobname").text = knob_name
+        for lvl, node in knob.nodes.items():
+            layer = etree.SubElement(knobfield, "knoblayer")
             basic_node = etree.SubElement(layer, "basicnode")
-            etree.SubElement(basic_node, "nodename").text = node["name"]
-            etree.SubElement(basic_node, "cost").text = node["cost"]
-            etree.SubElement(basic_node, "mv").text = node["quality"]
+            etree.SubElement(basic_node, "nodename").text = node.name
+            etree.SubElement(basic_node, "cost").text = node.cost
+            etree.SubElement(basic_node, "quality").text = node.quality
+            # dependencies
+            deps = kdg.getConstraintForNode(node.name)
+            if len(deps) > 0:
+                and_edge = etree.SubElement(basic_node, "and")
+                for constraint in deps:
+                    source = constraint.source_node
+                    etree.SubElement(and_edge, "name").text = source
+
     return xml
 
 
 def writeXML(appname, xml, outdir):
+    print("writing... KDG XML")
     xml_byte = prettify(xml)
     file_name = appname + ".xml"
-    outputfile = open(outdir + '/' + file_name, 'wb')
+    outputfile = open(outdir + "/" + file_name, "wb")
     outputfile.write(xml_byte)
     outputfile.close()
 
 
-def readdep(rsdgfile):
-    if rsdgfile == "":
-        print("[INFO] RSDG not provided, generating strucutral info only")
-        return [None, None]
-    rsdg = open(rsdgfile, 'r')
-    rsdg_map = {}
+def parseDepLine(line):
+    col = line.rstrip().split("<-")
+    sink = col[0].strip().split(".")
+    assert len(sink) == 2, "sink format error:" + sink
+    sources = col[1].strip()
+    assert sources[0] == "[" and sources[-1] == "]", "sources format error:" + sources
+    sources = sources[1:-1].split(",")
+
+    sink_knob = sink[0]
+    sink_node_lvl = int(sink[1])
+
+    constraints = []
+
+    for source in sources:
+        source = source.split(".")
+        assert len(source) == 2, "source format error:" + source
+        source_knob = source[0]
+        source_node_lvl = int(source[1])
+        constraint = Constraint(
+            source_knob + "_" + str(source_node_lvl),
+            sink_knob + "_" + str(sink_node_lvl),
+        )
+        constraints.append(constraint)
+
+    return constraints
+
+
+def parseKnobLine(line):
+    col = line.split(" ")
+    knob_name = col[0]
+    knob = Knob(knob_name)
+    knob_weights = col[1].rstrip()
+    assert knob_weights[0] == "[" and knob_weights[-1] == "]", (
+        "knob weights format error:" + knob_weights[-1]
+    )
+    weights = (knob_weights[1:-1]).split(",")
+    lvl = 0
+    for weight_pairs in weights:
+        assert weight_pairs[0] == "(" and weight_pairs[-1] == ")", (
+            "knob weights format error:" + weight_pairs
+        )
+        weight_pairs = weight_pairs[1:-1].split("-")
+        cost = weight_pairs[0]
+        quality = weight_pairs[1]
+        name = knob_name + "_" + str(lvl)
+        node = Node(name, cost, quality)
+        knob.addNode(node, lvl)
+        lvl += 1
+    return knob
+
+
+def readdep(descfile):
+    if descfile == "":
+        print("Description File Not Provided")
+        return None
+    kdg_file = open(descfile, "r")
+    lines = [line for line in kdg_file.readlines() if line.strip()]
     app_name = ""
     name_read = False
-    for line in rsdg:
-        if (not name_read):
-            app_name = line.rstrip()
+    line_is_knob = False
+    line_is_dep = False
+    rsdg = KDG()
+    for line in lines:
+        line = line.strip()
+        if not name_read:
+            app_name = line
+            rsdg.setName(app_name)
+            print("Setting Name: " + app_name)
             name_read = True
             continue
-        col = line.split(" ")
-        knob_name = col[0]
-        knob_weights = col[1].rstrip()
-        assert (knob_weights[0] == '[' and knob_weights[-1] == ']'
-                ), "knob weights format error:" + knob_weights[-1]
-        rsdg_map[knob_name] = []
-        weights = (knob_weights[1:-1]).split(",")
-        lvl = 0
-        for weight_pairs in weights:
-            assert (weight_pairs[0] == '(' and weight_pairs[-1] == ')'
-                    ), "knob weights format error:" + weight_pairs
-            weight_pairs = weight_pairs[1:-1].split("-")
-            cost = weight_pairs[0]
-            mv = weight_pairs[1]
-            name = knob_name + "_" + str(lvl)
-            lvl += 1
-            rsdg_map[knob_name].append({
-                "cost": cost,
-                "quality": mv,
-                "name": name
-            })
-    rsdg.close()
-    return app_name, rsdg_map
+        if line in [KNOB_IND, DEP_IND]:
+            line_is_knob = line == KNOB_IND
+            line_is_dep = not line_is_knob
+            continue
+        # actual lines
+        if line_is_knob:
+            knob = parseKnobLine(line)
+            rsdg.addKnob(knob)
+        elif line_is_dep:
+            constraints = parseDepLine(line)
+            rsdg.addConstraints(constraints)
+
+    kdg_file.close()
+    return rsdg
 
 
 def prettify(elem):
@@ -83,4 +146,4 @@ def prettify(elem):
     """
     rough_string = etree.tostring(elem)
     reparsed = minidom.parseString(rough_string)
-    return reparsed.toprettyxml(indent=INDENT, encoding='utf-8')
+    return reparsed.toprettyxml(indent=INDENT, encoding="utf-8")

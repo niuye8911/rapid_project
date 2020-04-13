@@ -14,7 +14,7 @@ def main(argv):
     parser = declareParser()
     options, args = parser.parse_args()
     parseCMD(options)
-    xml = xmlgen.genxml(desc, outdir)
+    xml = xmlgen.genXmlFile(desc, outdir)
     return 0
 
 
