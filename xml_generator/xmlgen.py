@@ -1,4 +1,5 @@
-from io import BytesIO
+# xml generator
+
 from xml.dom import minidom
 
 from KDG import *

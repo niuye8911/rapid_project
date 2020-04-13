@@ -7,6 +7,8 @@ class Node:
     def __init__(self, node_name, cost, quality):
         """ Initialization
         :param node_name: name of node
+        :param cost: cost of the node
+        :param quality: quality of the node
         """
         self.name = node_name
         self.cost = cost
@@ -14,31 +16,31 @@ class Node:
 
 
 class Knob:
-    """ a collection of Node
-    The Knob object can be retrieved by name
+    """ a collection of Node, referenced by lvl (id)
     """
 
     def __init__(self, knob_name):
         self.nodes = {}
         self.name = knob_name
 
-    def addNode(self, node, i):
+    def addNode(self, node, lvl):
         """ Add a node
         :param node: the node to be added
         """
-        self.nodes[i] = node
+        self.nodes[lvl] = node
 
-    def getNode(self, id):
+    def getNode(self, lvl):
         """ Get a node
-        :param id: id of the node
+        :param lvl: level of the node
         """
-        return self.nodes[id]
+        return self.nodes[lvl]
 
 
 class Constraint:
-    """ a continuous constraint with source and sink
-    The syntax of a constraint is:
-    if sink_min <= sink <= sink_max, then source_min <= source <= source_max
+    """ a node pairwise constraint
+    The semantic of a constraint in a KDG graph is:
+    sink <----- source
+    if source_node is chosen, then the sink_node must be chosen
     """
 
     def __init__(self, source_node, sink_node):
@@ -47,8 +49,7 @@ class Constraint:
 
 
 class KDG:
-    """ a segment of a knob
-    The segment of knob can be used both in dependencies and constraint
+    """ a collection of a knobs and a list of constraints
     """
 
     def __init__(self):
@@ -69,6 +70,9 @@ class KDG:
         self.constraints.extend(constraints)
 
     def getConstraintForNode(self, node_name):
+        """ retrieve the list of Constraints in which the node_name is the sink
+        :param node_name: the name of the node (sink)
+        """
         sources = []
         for c in self.constraints:
             if c.sink_node == node_name:
