@@ -1,1 +1,1 @@
-__all__ = ["Classes","xmlgen"]
+__all__ = ["KDG", "xmlgen", "rapid"]

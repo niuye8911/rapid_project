@@ -38,16 +38,16 @@ void Level::addBasicNode(Basic *basic) { basicNodes_.push_back(basic); }
 int Level::getLevelNum() { return level_; }
 
 Level::~Level() {
-  for (Basic *basic : basicNodes_) {
-    delete basic;
-  }
+    for (Basic *basic : basicNodes_) {
+        delete basic;
+    }
 }
 
 
 /****** Knob ******/
 
 Knob::Knob(string knob_name){
-  setName(knob_name);
+    setName(knob_name);
 }
 
 vector<Level *> *Knob::getLevelNodes() { return &levelNodes_; }
@@ -55,9 +55,9 @@ vector<Level *> *Knob::getLevelNodes() { return &levelNodes_; }
 void Knob::addLevelNode(Level *level) { levelNodes_.push_back(level); }
 
 Knob::~Knob() {
-  for (Level *level : levelNodes_) {
-    delete level;
-  }
+    for (Level *level : levelNodes_) {
+        delete level;
+    }
 }
 
 
@@ -66,31 +66,31 @@ Knob::~Knob() {
 KDG::KDG(string appName):appName_(appName) {}
 
 void KDG::addKnob(Knob *knob) {
-  knobs_.push_back(knob);
+    knobs_.push_back(knob);
 }
 
 Node *KDG::getNodeFromName(string name) {
-  for (Knob *knob : knobs_) {
-    if (knob->getName().compare(name) == 0) {
-      return knob;
-    }
-    for (Level *lvl : *(knob->getLevelNodes())) {
-      for (Basic *b : *(lvl->getBasicNodes())) {
-        if (b->getName().compare(name) == 0) {
-          return b;
+    for (Knob *knob : knobs_) {
+        if (knob->getName().compare(name) == 0) {
+            return knob;
         }
-      }
+        for (Level *lvl : *(knob->getLevelNodes())) {
+            for (Basic *b : *(lvl->getBasicNodes())) {
+                if (b->getName().compare(name) == 0) {
+                    return b;
+                }
+            }
+        }
     }
-  }
-  return NULL;
+    return NULL;
 }
 
 string KDG::getName(){
-  return appName_;
+    return appName_;
 }
 
 KDG::~KDG() {
-  for (Knob *knob : knobs_) {
-    delete knob;
-  }
+    for (Knob *knob : knobs_) {
+        delete knob;
+    }
 }

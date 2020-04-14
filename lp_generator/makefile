@@ -26,3 +26,4 @@ graph.o: KDG.cpp
 
 clean:
 	rm *.o
+	rm $(TARGET)

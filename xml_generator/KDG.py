@@ -1,5 +1,6 @@
 # classes for KDG
 
+
 class Node:
     """a node
     """
@@ -56,12 +57,11 @@ class KDG:
         self.knobs = {}
         self.constraints = []
 
-    def setName(self,app_name):
+    def setName(self, app_name):
         self.name = app_name
 
-
     def addKnob(self, knob):
-        self.knobs[knob.name]=knob
+        self.knobs[knob.name] = knob
 
     def addConstraint(self, constraint):
         self.constraints.append(constraint)

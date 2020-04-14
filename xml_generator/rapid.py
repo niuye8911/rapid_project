@@ -5,9 +5,11 @@ import sys
 
 import xmlgen
 
+
 # CMD line Parmeters
 desc = ""
 outdir = ""
+
 
 def main(argv):
     # parse the argument
@@ -20,8 +22,8 @@ def main(argv):
 
 def declareParser():
     parser = optparse.OptionParser()
-    parser.add_option('--desc', dest="desc", default="")
-    parser.add_option('--outdir', dest="outdir", default="./")
+    parser.add_option("--desc", dest="desc", default="")
+    parser.add_option("--outdir", dest="outdir", default="./")
     return parser
 
 
@@ -31,5 +33,5 @@ def parseCMD(options):
     outdir = options.outdir
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

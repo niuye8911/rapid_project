@@ -5,7 +5,7 @@ using namespace std;
 using namespace rapidxml;
 
 class Parser{
-  private:
+private:
     KDG *graph_;
     float budget_;
     string appName_;
@@ -14,8 +14,8 @@ class Parser{
     string genbudgetConstraint(); // generate the budget constraint
     string genObjectiveFunction(); // generate the objective function (quality)
     string genBinaries(); // all the LP variables should be binary
-
-  public:
+    
+public:
     Parser(string appName);
     void writeLp(string output);                  // lp from XML
     void setBudget(float budget);                // Set energy budget
