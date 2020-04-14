@@ -7,11 +7,9 @@
                 <nodename>S2_0</nodename>
                 <cost>10</cost>
                 <quality>10</quality>
-                <and>
-                    <name>S1_0</name>
-                    <name>S1_1</name>
-                    <name>S1_2</name>
-                </and>
+                <and>S1_0</and>
+                <and>S1_1</and>
+                <and>S1_2</and>
             </basicnode>
         </knoblayer>
         <knoblayer>
@@ -19,6 +17,8 @@
                 <nodename>S2_1</nodename>
                 <cost>20</cost>
                 <quality>20</quality>
+                <and>S1_2</and>
+                <and>S1_3</and>
             </basicnode>
         </knoblayer>
     </knob>
@@ -36,10 +36,6 @@
                 <nodename>S1_1</nodename>
                 <cost>20</cost>
                 <quality>20</quality>
-                <and>
-                    <name>S1_2</name>
-                    <name>S1_3</name>
-                </and>
             </basicnode>
         </knoblayer>
         <knoblayer>

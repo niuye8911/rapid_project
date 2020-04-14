@@ -1,51 +1,28 @@
-CC = g++-7
-CFLAGS =  -pthread -Wall -Wno-sign-compare -g -c
-TFLAGS =  -pthread -Wall -g
+CC = g++
+CFLAGS =  -Wall -g -c -std=c++11
 
-INCLUDE = -I/usr/include/curl
-LDLIBS = -lcurl
+OBJFILES = graph.o parser.o main.o
+TARGET = lp_generator
 
-#dynamic: dynamic.cpp
-#	$(info resolving weights...)
-#	$(CC) $(TFLAGS) -o $@ $<
+all: $(TARGET)
 
-all: main
+$(TARGET): $(OBJFILES)
+	$(CC) -std=c++11 -o $(TARGET) $(OBJFILES)
 
-# main
-main: rsdg.a main.cpp
-	$(info building lp generator...)
+# lp_translator
+main.o: main.cpp
+	$(info building main...)
 	$(CC) $(CFLAGS) -o $@ $<
 
-# capsulating into static lib
-rsdg.a: rsdg.o rsdggraph.o rsdgparser.o rsdgwrapper.o
-	$(info building static library...)
-	ar -r -c -s $@ *.o
-
-# top lvl object
-rsdg.o: rsdgMission.cpp rsdgservice.o rsdgService.h
-	$(info building rsdg Mission...)
-	$(CC) $(CFLAGS) $(INCLUDE) $(LDLIBS) -L rsdgservice.o -o $@ $<
-
-# RSDG Service
-rsdgservice.o: rsdgService.cpp
-	$(info building rsdg Service...)
+# XML decoder / LP generator
+parser.o: Parser.cpp
+	$(info Building Parser...)
 	$(CC) $(CFLAGS) -o $@ $<
 
-# C wrapper for rsdgMisison
-rsdgwrapper.o: rsdgMissionWrapper.cpp
-	$(info building rsdg Mission wrapper...)
-	$(CC) $(CFLAGS) $(INCLUDE) $<
-
-# RSDG graph core
-rsdggraph.o: RSDG.cpp
-	$(info building rsdg Graph...)
+# KDG graph core
+graph.o: KDG.cpp
+	$(info building KDG Graph...)
 	$(CC) $(CFLAGS) -o $@ $<
-
-# XML encoder / decoder
-rsdgparser.o: Parser.cpp
-	$(CC) $(CFLAGS) -o $@ $<
-	$(info Building rsdg Parser...)
 
 clean:
 	rm *.o
-	rm build/rsdg.a

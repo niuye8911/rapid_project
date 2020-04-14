@@ -39,10 +39,9 @@ def genXML(kdg):
             # dependencies
             deps = kdg.getConstraintForNode(node.name)
             if len(deps) > 0:
-                and_edge = etree.SubElement(basic_node, "and")
                 for constraint in deps:
                     source = constraint.source_node
-                    etree.SubElement(and_edge, "name").text = source
+                    etree.SubElement(basic_node, "and").text = source
 
     return xml
 
