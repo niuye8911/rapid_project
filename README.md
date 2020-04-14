@@ -1,38 +1,43 @@
-## RAPID(C)
+## RAPID_Project
 
-*this is the source repo for RAPID(C) library (linux)
+project dir for LP generation (.lp) from Description file (.desc)
 
 ### - Contents
 
-RAPID(C) source contains 2 main parts:
+This dir contains 2 main parts:
 
-1) The C++ static library being used later to instrument applications [RAPID(C)_root]
+1) The python script to generate the XML representation of a KDG
 
-2) The Python script to run the training [RAPID(C)_root/modelConstr/source]
+2) The Cpp code to generate the LP file to be further interpreted and solved by Gurobi
 
 ### - BUILD
 
 The python script does not need to be installed, python interpreter (2.7) will be enough
 
-Steps to build the C++ library:
+Steps to build the sample C++ code:
 
-1) install necessary libs:
+1) The header file to parse XML is already in the source
 
-```
-$ sudo apt-get install libcurl-dev
-```
-
-2) make sure the path to libcurl is updated in [Makefile](https://github.com/niuye8911/rapidlib-linux/blob/master/makefile)
-
-3) make
+2) make
 
 ```
 $ make
 ```
 
-The output should contain a static library, **rsdg.a**
+The output should be an executable, **lp_generator**
 
 
-### - LEARN MORE
+### - example calls
 
-Please refer to the [IO page](https://niuye8911.github.com/rapidlib-linux) for this project to learn how to use RAPID(C) to write your own approximate applications.
+
+1) generate the XML
+```
+$ python rapid.py --desc ../example_input/Small.desc --outdir ../example_output/
+```
+it should generate a ***Small.xml*** in ../example_output
+
+2) generate the LP
+```
+$ ./lp_generator --budget 99 --xml ../example_output/Small.xml --app Small
+```
+it should generate a ***Small.lp*** in ../example_output
