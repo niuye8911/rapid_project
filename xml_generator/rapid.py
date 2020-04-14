@@ -23,7 +23,7 @@ def main(argv):
 def declareParser():
     parser = optparse.OptionParser()
     parser.add_option("--desc", dest="desc", default="")
-    parser.add_option("--outdir", dest="outdir", default="./")
+    parser.add_option("--outdir", dest="outdir", default="../example_output/")
     return parser
 
 
